@@ -5,6 +5,6 @@ OSINT
 
 一款简约的开源情报搜集框架，默认内置了多个蓝队溯源查询接口，亦可添加自定义插件用于红队信息搜集。  
 
-插件路径：`pkg/detectors/`
+插件路径：`pkg/detectors/`  
 配置文件：`utils/config.go`  
 
