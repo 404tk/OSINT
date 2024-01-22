@@ -18,11 +18,11 @@ func (d QQInfo) Run(args structs.ScanArgs) (bool, string) {
 
 	req := &request.Req{
 		Schema:   "https",
-		Endpoint: "www.devtool.top",
-		Path:     "/api/qq/info",
+		Endpoint: "users.qzone.qq.com",
+		Path:     "/fcg-bin/cgi_get_portrait.fcg",
 		Method:   "GET",
 		Header:   make(map[string]string),
-		Query:    fmt.Sprintf("qq=%s", args.QQ),
+		Query:    fmt.Sprintf("uins=%s", args.QQ),
 	}
 	resp, err := req.Request()
 	if err != nil || resp.StatusCode != 200 {
@@ -33,8 +33,9 @@ func (d QQInfo) Run(args structs.ScanArgs) (bool, string) {
 	logger.Info(d.Desc())
 
 	body := request.ReadResponseBody(resp)
-	name := gjson.Get(body, "data").Get("nick").String()
-	if name != "" {
+	infos := gjson.Get(body, args.QQ).Array()
+	if len(infos) > 2 {
+		name := infos[len(infos)-2].String()
 		msg := "QQ昵称: " + name
 		logger.Warning(msg)
 		return true, msg
