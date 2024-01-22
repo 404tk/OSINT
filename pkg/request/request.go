@@ -1,7 +1,7 @@
 package request
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -63,7 +63,7 @@ func (r *Req) Request() (*http.Response, error) {
 
 // ReadResponseBody reads response body and return string
 func ReadResponseBody(response *http.Response) string {
-	bodyBytes, err := ioutil.ReadAll(response.Body)
+	bodyBytes, err := io.ReadAll(response.Body)
 	if err != nil {
 		return ""
 	}

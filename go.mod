@@ -3,7 +3,7 @@ module osint
 go 1.20
 
 require (
-	github.com/404tk/table v0.0.1
+	github.com/404tk/table v0.0.4
 	github.com/tidwall/gjson v1.16.0
 )
 

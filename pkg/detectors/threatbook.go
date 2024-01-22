@@ -40,7 +40,7 @@ func (d ThreatBook) Run(options schema.Options) (bool, string) {
 	}
 
 	body := request.ReadResponseBody(resp)
-	if gjson.Get(body, "response_code").Int() == -1 {
+	if gjson.Get(body, "response_code").Int() < 0 {
 		logger.Error("微步/v3/ip/query", gjson.Get(body, "verbose_msg").String())
 		return false, ""
 	}
