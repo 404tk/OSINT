@@ -3,19 +3,18 @@ package detectors
 import (
 	"net/url"
 	"osint/pkg/request"
-	"osint/pkg/schema"
+	"osint/pkg/structs"
 	"osint/utils/logger"
 )
 
 type TieBa struct{}
 
-func (d TieBa) Run(options schema.Options) (bool, string) {
-	uname, ok := options.GetMetadata("CN_Uname")
-	if !ok {
+func (d TieBa) Run(args structs.ScanArgs) (bool, string) {
+	if len(args.CName) == 0 {
 		return false, ""
 	}
 	query := url.Values{}
-	query.Add("un", uname)
+	query.Add("un", args.CName)
 	// 判断用户名是否存在
 	req := &request.Req{
 		Schema:   "https",

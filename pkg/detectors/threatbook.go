@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/url"
 	"osint/pkg/request"
-	"osint/pkg/schema"
+	"osint/pkg/structs"
 	"osint/utils"
 	"osint/utils/logger"
 	"strings"
@@ -14,9 +14,13 @@ import (
 
 type ThreatBook struct{}
 
-func (d ThreatBook) Run(options schema.Options) (bool, string) {
-	ip, ok := options.GetMetadata("IP")
-	if !ok {
+func (d ThreatBook) Run(args structs.ScanArgs) (bool, string) {
+	if len(args.IP) == 0 {
+		return false, ""
+	}
+
+	if len(utils.TB_APIKey) == 0 {
+		logger.Error("微步在线查询缺少APIKey")
 		return false, ""
 	}
 
@@ -24,7 +28,7 @@ func (d ThreatBook) Run(options schema.Options) (bool, string) {
 	query.Add("apikey", utils.TB_APIKey)
 	query.Add("exclude", "asn,rdns_list,intelligences,judgments,tags_classes,samples,update_time")
 	query.Add("lang", "zh")
-	query.Add("resource", ip)
+	query.Add("resource", args.IP)
 	req := &request.Req{
 		Schema:   "https",
 		Endpoint: "api.threatbook.cn",
@@ -44,9 +48,9 @@ func (d ThreatBook) Run(options schema.Options) (bool, string) {
 		logger.Error("微步/v3/ip/query", gjson.Get(body, "verbose_msg").String())
 		return false, ""
 	}
-	ipinfo := gjson.Get(body, "data").Get(strings.ReplaceAll(ip, ".", "\\."))
-	logger.Info(d.Desc(), ip)
-	msg := printBasic(ip, ipinfo)
+	ipinfo := gjson.Get(body, "data").Get(strings.ReplaceAll(args.IP, ".", "\\."))
+	logger.Info(d.Desc(), args.IP)
+	msg := printBasic(args.IP, ipinfo)
 	ports := ipinfo.Get("ports").Array()
 	if len(ports) > 0 {
 		msg += "\n" + printPort(ports)

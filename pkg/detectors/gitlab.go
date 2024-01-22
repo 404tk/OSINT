@@ -2,7 +2,7 @@ package detectors
 
 import (
 	"osint/pkg/request"
-	"osint/pkg/schema"
+	"osint/pkg/structs"
 	"osint/utils/logger"
 
 	"github.com/tidwall/gjson"
@@ -10,9 +10,8 @@ import (
 
 type Gitlab struct{}
 
-func (d Gitlab) Run(options schema.Options) (bool, string) {
-	username, ok := options.GetMetadata("Username")
-	if !ok {
+func (d Gitlab) Run(args structs.ScanArgs) (bool, string) {
+	if len(args.UName) == 0 {
 		return false, ""
 	}
 	// 判断用户名是否存在
@@ -22,7 +21,7 @@ func (d Gitlab) Run(options schema.Options) (bool, string) {
 		Path:     "/api/v4/users",
 		Method:   "GET",
 		Header:   make(map[string]string),
-		Query:    "username=" + username,
+		Query:    "username=" + args.UName,
 	}
 	resp, err := req.Request()
 	if err != nil || resp.StatusCode != 200 {

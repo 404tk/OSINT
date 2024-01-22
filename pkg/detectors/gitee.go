@@ -3,22 +3,21 @@ package detectors
 import (
 	"fmt"
 	"osint/pkg/request"
-	"osint/pkg/schema"
+	"osint/pkg/structs"
 	"osint/utils/logger"
 )
 
 type Gitee struct{}
 
-func (d Gitee) Run(options schema.Options) (bool, string) {
-	username, ok := options.GetMetadata("Username")
-	if !ok {
+func (d Gitee) Run(args structs.ScanArgs) (bool, string) {
+	if len(args.UName) == 0 {
 		return false, ""
 	}
 	// 判断用户名是否存在
 	req := &request.Req{
 		Schema:   "https",
 		Endpoint: "gitee.com",
-		Path:     fmt.Sprintf("/%s", username),
+		Path:     fmt.Sprintf("/%s", args.UName),
 		Method:   "GET",
 		Header:   make(map[string]string),
 	}

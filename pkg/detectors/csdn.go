@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/url"
 	"osint/pkg/request"
-	"osint/pkg/schema"
+	"osint/pkg/structs"
 	"osint/utils/logger"
 	"strings"
 
@@ -13,11 +13,11 @@ import (
 
 type CSDN struct{}
 
-func (d CSDN) Run(options schema.Options) (bool, string) {
-	username, ok := options.GetMetadata("Username")
-	if !ok {
+func (d CSDN) Run(args structs.ScanArgs) (bool, string) {
+	if len(args.UName) == 0 {
 		return false, ""
 	}
+	username := args.UName
 	// 判断用户名是否存在
 	flag, msg := queryCSDN(username)
 	if !flag {

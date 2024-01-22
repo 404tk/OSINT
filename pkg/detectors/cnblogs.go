@@ -3,23 +3,22 @@ package detectors
 import (
 	"fmt"
 	"osint/pkg/request"
-	"osint/pkg/schema"
+	"osint/pkg/structs"
 	"osint/utils/logger"
 	"strings"
 )
 
 type CNblogs struct{}
 
-func (d CNblogs) Run(options schema.Options) (bool, string) {
-	username, ok := options.GetMetadata("Username")
-	if !ok {
+func (d CNblogs) Run(args structs.ScanArgs) (bool, string) {
+	if len(args.UName) == 0 {
 		return false, ""
 	}
 	// 判断用户名是否存在
 	req := &request.Req{
 		Schema:   "https",
 		Endpoint: "www.cnblogs.com",
-		Path:     fmt.Sprintf("/%s", username),
+		Path:     fmt.Sprintf("/%s", args.UName),
 		Method:   "GET",
 		Header:   make(map[string]string),
 	}

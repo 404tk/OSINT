@@ -3,7 +3,7 @@ package detectors
 import (
 	"fmt"
 	"osint/pkg/request"
-	"osint/pkg/schema"
+	"osint/pkg/structs"
 	"osint/utils"
 	"osint/utils/logger"
 	"strings"
@@ -14,21 +14,22 @@ import (
 
 type Github struct{}
 
-func (d Github) Run(options schema.Options) (bool, string) {
-	username, ok := options.GetMetadata("Username")
-	if !ok {
+func (d Github) Run(args structs.ScanArgs) (bool, string) {
+	if len(args.UName) == 0 {
 		return false, ""
 	}
 	// 判断用户名是否存在
 	req := &request.Req{
 		Schema:   "https",
 		Endpoint: "api.github.com",
-		Path:     fmt.Sprintf("/users/%s", username),
+		Path:     fmt.Sprintf("/users/%s", args.UName),
 		Method:   "GET",
 		Header: map[string]string{
-			"Authorization": "Bearer " + utils.GH_Token,
-			"Accept":        "application/vnd.github+json",
+			"Accept": "application/vnd.github+json",
 		},
+	}
+	if len(utils.GH_Token) > 0 {
+		req.Header["Authorization"] = "Bearer " + utils.GH_Token
 	}
 	resp, err := req.Request()
 	if err != nil || resp.StatusCode != 200 {
@@ -37,7 +38,7 @@ func (d Github) Run(options schema.Options) (bool, string) {
 	}
 
 	logger.Info(d.Desc())
-	logger.Warning("https://github.com/" + username)
+	logger.Warning("https://github.com/" + args.UName)
 
 	// 列举repos
 	req.Path += "/repos"

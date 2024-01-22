@@ -1,14 +1,14 @@
 package detectors
 
 import (
-	"osint/pkg/schema"
+	"osint/pkg/structs"
 	"osint/utils/logger"
 
 	"github.com/404tk/table"
 )
 
 type Detector interface {
-	Run(schema.Options) (bool, string)
+	Run(structs.ScanArgs) (bool, string)
 	Desc() string
 }
 

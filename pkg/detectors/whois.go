@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/url"
 	"osint/pkg/request"
-	"osint/pkg/schema"
+	"osint/pkg/structs"
 	"osint/utils/logger"
 
 	"github.com/tidwall/gjson"
@@ -12,14 +12,13 @@ import (
 
 type Whois struct{}
 
-func (d Whois) Run(options schema.Options) (bool, string) {
-	domain, ok := options.GetMetadata("Domain")
-	if !ok {
+func (d Whois) Run(args structs.ScanArgs) (bool, string) {
+	if len(args.Domain) == 0 {
 		return false, ""
 	}
 
 	query := url.Values{}
-	query.Add("domain", domain)
+	query.Add("domain", args.Domain)
 	req := &request.Req{
 		Schema:   "https",
 		Endpoint: "whois.4.cn",
@@ -37,7 +36,7 @@ func (d Whois) Run(options schema.Options) (bool, string) {
 	}
 
 	body := request.ReadResponseBody(resp)
-	logger.Info(d.Desc(), domain)
+	logger.Info(d.Desc(), args.Domain)
 	date := gjson.Get(body, "data.create_date").String()
 	if date != "" {
 		info := gjson.Get(body, "data")

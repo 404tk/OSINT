@@ -3,7 +3,7 @@ package detectors
 import (
 	"fmt"
 	"osint/pkg/request"
-	"osint/pkg/schema"
+	"osint/pkg/structs"
 	"osint/utils/logger"
 
 	"github.com/tidwall/gjson"
@@ -11,19 +11,18 @@ import (
 
 type QQInfo struct{}
 
-func (d QQInfo) Run(options schema.Options) (bool, string) {
-	qq, ok := options.GetMetadata("QQ")
-	if !ok {
+func (d QQInfo) Run(args structs.ScanArgs) (bool, string) {
+	if len(args.QQ) == 0 {
 		return false, ""
 	}
 
 	req := &request.Req{
 		Schema:   "https",
-		Endpoint: "qagzs.com:88",
-		Path:     "/api/qq昵称/",
+		Endpoint: "www.devtool.top",
+		Path:     "/api/qq/info",
 		Method:   "GET",
 		Header:   make(map[string]string),
-		Query:    fmt.Sprintf("qq=%s", qq),
+		Query:    fmt.Sprintf("qq=%s", args.QQ),
 	}
 	resp, err := req.Request()
 	if err != nil || resp.StatusCode != 200 {
@@ -34,7 +33,7 @@ func (d QQInfo) Run(options schema.Options) (bool, string) {
 	logger.Info(d.Desc())
 
 	body := request.ReadResponseBody(resp)
-	name := gjson.Get(body, "name").String()
+	name := gjson.Get(body, "data").Get("nick").String()
 	if name != "" {
 		msg := "QQ昵称: " + name
 		logger.Warning(msg)

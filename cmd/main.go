@@ -4,30 +4,25 @@ import (
 	"flag"
 	"fmt"
 	"osint/pkg/detectors"
-	"osint/pkg/schema"
+	"osint/pkg/structs"
+	"osint/utils"
 	"osint/utils/logger"
 )
 
 var (
-	username string
-	cn_uname string
-	ip       string
-	qq       string
-	wb       string
-	phone    string
-	domain   string
-	list     bool
-	silent   bool
+	list, silent bool
+	args         = structs.ScanArgs{}
 )
 
 func init() {
-	flag.StringVar(&username, "u", "", "Username")
-	flag.StringVar(&cn_uname, "cu", "", "Chinese Username")
-	flag.StringVar(&ip, "ip", "", "IP")
-	flag.StringVar(&qq, "qq", "", "QQ")
-	flag.StringVar(&wb, "wb", "", "WB_Uid")
-	flag.StringVar(&phone, "ph", "", "Phone number")
-	flag.StringVar(&domain, "d", "", "Domain")
+	flag.StringVar(&args.UName, "u", "", "英文ID")
+	flag.StringVar(&args.CName, "cu", "", "中文ID")
+	flag.StringVar(&args.IP, "ip", "", "IP地址")
+	flag.StringVar(&args.Domain, "d", "", "域名")
+	flag.StringVar(&args.QQ, "qq", "", "QQ号码")
+	flag.StringVar(&utils.GH_Token, "gh", "", "GitHub Token")
+	flag.StringVar(&utils.TB_APIKey, "tb", "", "微步APIKey")
+	flag.StringVar(&utils.VT_APIKey, "vt", "", "VirusTotal APIKey")
 	flag.BoolVar(&list, "list", false, "List all payloads")
 	flag.BoolVar(&silent, "silent", false, "Silent module")
 	flag.Parse()
@@ -38,28 +33,18 @@ func main() {
 		detectors.ListAll()
 		return
 	}
-	options := schema.Options{
-		"Username": username,
-		"CN_Uname": cn_uname,
-		"IP":       ip,
-		"QQ":       qq,
-		"WB_Uid":   wb,
-		"Phone":    phone,
-		"Domain":   domain,
-	}
-	options = options.CheckMetadata()
-	if len(options) == 0 {
+	if args.IsEmpty() {
 		flag.PrintDefaults()
 		return
 	}
 	if !silent {
 		logger.Debug = true
 		for _, d := range detectors.Detectors {
-			d.Run(options)
+			d.Run(args)
 		}
 	} else {
 		for _, d := range detectors.Detectors {
-			flag, msg := d.Run(options)
+			flag, msg := d.Run(args)
 			if flag {
 				fmt.Println(msg)
 			}

@@ -3,7 +3,7 @@ package detectors
 import (
 	"fmt"
 	"osint/pkg/request"
-	"osint/pkg/schema"
+	"osint/pkg/structs"
 	"osint/utils/logger"
 
 	"github.com/tidwall/gjson"
@@ -11,9 +11,8 @@ import (
 
 type Mail163 struct{}
 
-func (d Mail163) Run(options schema.Options) (bool, string) {
-	username, ok := options.GetMetadata("Username")
-	if !ok {
+func (d Mail163) Run(args structs.ScanArgs) (bool, string) {
+	if len(args.UName) == 0 {
 		return false, ""
 	}
 	// 判断用户名是否存在
@@ -25,7 +24,7 @@ func (d Mail163) Run(options schema.Options) (bool, string) {
 		Header: map[string]string{
 			"Content-Type": "application/x-www-form-urlencoded",
 		},
-		Body: fmt.Sprintf("cmd=urs.checkNameAndReco&domain=163.com&name=%s", username),
+		Body: fmt.Sprintf("cmd=urs.checkNameAndReco&domain=163.com&name=%s", args.UName),
 	}
 	resp, err := req.Request()
 	if err != nil {
@@ -36,7 +35,7 @@ func (d Mail163) Run(options schema.Options) (bool, string) {
 	exist := gjson.Get(body, "result.exist").Int()
 	if exist == 1 {
 		logger.Info(d.Desc())
-		msg := fmt.Sprintf("存在已注册邮箱 %s@163.com", username)
+		msg := fmt.Sprintf("存在已注册邮箱 %s@163.com", args.UName)
 		logger.Warning(msg)
 		return true, msg
 	}
